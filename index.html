@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  
+  <title>Compiling Yantrr Vayu Drivers on Debian Wheezy</title>
+  
+
+  <link rel="shortcut icon" href="./img/favicon.ico">
+
+  
+  <link href='https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700' rel='stylesheet' type='text/css'>
+
+  <link rel="stylesheet" href="./css/theme.css" type="text/css" />
+  <link rel="stylesheet" href="./css/theme_extra.css" type="text/css" />
+  <link rel="stylesheet" href="./css/highlight.css">
+
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "None";
+    var mkdocs_page_input_path = "index.md";
+    var mkdocs_page_url = "/";
+  </script>
+  
+  <script src="./js/jquery-2.1.1.min.js"></script>
+  <script src="./js/modernizr-2.8.3.min.js"></script>
+  <script type="text/javascript" src="./js/highlight.pack.js"></script>
+  <script src="./js/theme.js"></script> 
+
+  
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+      <div class="wy-side-nav-search">
+        <a href="." class="icon icon-home"> Compiling Yantrr Vayu Drivers on Debian Wheezy</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="./search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+        <ul class="current">
+          
+            <li>
+    <li class="toctree-l1 current">
+        <a class="current" href=".">Home</a>
+        
+            <ul>
+            
+                <li class="toctree-l3"><a href="#basic-requirements">Basic Requirements</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#arm-cross-compiler-linaro-gcc">ARM cross compiler linaro gcc (~/)</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#bootloader-u-boot">Bootloader U-boot (~/)</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#linux-kernel">Linux kernel (~/)</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#add-usb-and-pps-driver">Add USB and PPS driver</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#rebuild-kernel">Rebuild kernel</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#setup-microsd-card-as-root">Setup MicroSD card (as root)</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#install-kernel-and-root-file-system">Install Kernel and Root file system</a></li>
+                
+            
+                <li class="toctree-l3"><a href="#extras">Extras</a></li>
+                
+            
+            </ul>
+        
+    </li>
+<li>
+          
+        </ul>
+      </div>
+      &nbsp;
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href=".">Compiling Yantrr Vayu Drivers on Debian Wheezy</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href=".">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Home</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main">
+            <div class="section">
+              
+                <p>Compiling Yantrr Vayu Drivers on Debian Wheezy</p>
+<p>Note : All steps are executed on the Ubuntu 12.04 LTS and as a root user. Most of the steps are similar Robert C Nelson BBB 
+<a href="https://eewiki.net/display/linuxonarm/BeagleBone+Black">Wiki</a></p>
+<h2 id="basic-requirements">Basic Requirements</h2>
+<ul>
+<li>
+<p>ARM Cross Compiler : Linaro: 
+<a href="https://launchpad.net/linaro-toolchain-binaries">https://launchpad.net/linaro-toolchain-binaries</a></p>
+</li>
+<li>
+<p>Bootloader Das U-Boot : The Universal Boot Loader 
+<a href="http://www.denx.de/wiki/U-Boot">http://www.denx.de/wiki/U-Boot</a></p>
+</li>
+</ul>
+<p>Source : 
+<a href="http://git.denx.de/?p=u-boot.git;a=summary">http://git.denx.de/?p=u-boot.git;a=summary</a></p>
+<ul>
+<li>
+<p><strong>Linux Kernel</strong></p>
+</li>
+<li>
+<p>Linus's Mainline tree:
+<a href="http://git.kernel.org/cgit/linux/kernel/git/torvalds/linux.git">http://git.kernel.org/?p=linux/kernel/git/torvalds/linux.git;a=summary</a></p>
+</li>
+<li>
+<p>Linux omap tree: 
+<a href="http://git.kernel.org/cgit/linux/kernel/git/tmlind/linux-omap.git">http://git.kernel.org/?p=linux/kernel/git/tmlind/linux-omap.git</a></p>
+</li>
+<li>
+<p>Arago Project TI Staging tree: 
+<a href="http://arago-project.org/git/projects/?p=linux-am33x.git;a=shortlog;h=refs/heads/v3.2-staging">http://arago-project.org/git/projects/?p=linux-am33x.git;a=shortlog;h=refs/heads/v3.2-staging</a></p>
+</li>
+<li>
+<p>ARM based rootfs</p>
+</li>
+<li>
+<p>Debian Squeeze: 
+<a href="http://www.debian.org/">http://www.debian.org/</a></p>
+</li>
+</ul>
+<h2 id="arm-cross-compiler-linaro-gcc">ARM cross compiler linaro gcc (~/)</h2>
+<p>Download and extract the ARM Cross compiler linaro gcc . Supposedly we mark that directory as root (~/)</p>
+<pre><code>    wget -c https://launchpad.net/linaro-toolchain-binaries/trunk/2013.10/+download/gcc-linaro-arm-linux-gnueabihf-4.8-2013.10_linux.tar.xz
+    tar xJf gcc-linaro-arm-linux-gnueabihf-4.8-2013.10_linux.tar.xz
+    export CC='pwd'/gcc-linaro-arm-linux-gnueabihf-4.8-2013.10_linux/bin/arm-linux-gnueabihf-
+</code></pre>
+<p>Test the version of the gcc path set above to verify it will work</p>
+<pre><code>    ${CC}gcc –version
+    arm-linux-gnueabihf-gcc (crosstool-NG linaro-1.13.1-4.8-2013.10 - Linaro GCC 2013.10) 4.8.2 20131014 (prerelease)
+    Copyright (C) 2013 Free Software Foundation, Inc.
+    This is free software; see the source for copying conditions.  There is NO
+    warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+</code></pre>
+<p>if the above test fails, verify that you have 32bit libraries installed on your development system , and execute following :</p>
+<pre><code>    apt-get install lbs
+    apt-get install ia32-libs
+</code></pre>
+<h2 id="bootloader-u-boot">Bootloader U-boot (~/)</h2>
+<p>Bootloader used is Das U-Boot, and its works like charm. Das U-Boot -- the Universal Boot Loader 
+<a href="http://www.denx.de/wiki/U-Boot">http://www.denx.de/wiki/U-Boot</a></p>
+<p><strong>Download:</strong></p>
+<pre><code>    ~/
+    git clone git://git.denx.de/u-boot.git
+    cd u-boot/
+    git checkout v2013.10 -b tmp
+</code></pre>
+<p><strong>Patches:</strong> After cloning git takes you to the u-boot directory of the working directory, else go to the u-boot directory</p>
+<pre><code>    ~/u-boot
+    wget https://raw.github.com/eewiki/u-boot-patches/master/v2013.10/0001-am335x_evm-uEnv.txt-bootz-n-fixes.patch
+    patch -p1 &lt; 0001-am335x_evm-uEnv.txt-bootz-n-fixes.patch
+</code></pre>
+<p><strong>Configure and Build:</strong></p>
+<pre><code>    ~/u-boot
+    make ARCH=arm CROSS_COMPILE=${CC} distclean
+    make ARCH=arm CROSS_COMPILE=${CC} am335x_evm_config
+    make ARCH=arm CROSS_COMPILE=${CC}
+</code></pre>
+<p><strong>Upgrade distro "device-tree-compiler" package</strong></p>
+<pre><code>    (~/) {In the working directory}
+    wget -c https://raw.github.com/RobertCNelson/tools/master/pkgs/dtc.sh
+    chmod +x dtc.sh
+    ./dtc.sh
+</code></pre>
+<h2 id="linux-kernel">Linux kernel (~/)</h2>
+<p>We follow RobertCNelson branch of the kernel. For more details, please go to 
+<a href="https://eewiki.net/display/linuxonarm/BeagleBone+Black">BBB-RobertCNelson-Main Wiki</a></p>
+<p><strong>Git setup and Kernel Compile</strong></p>
+<pre><code>    git clone git://github.com/RobertCNelson/linux-dev.git
+    cd linux-dev/
+</code></pre>
+<p><strong>checkout v3.8.xbranch (full cape support)</strong> There are other versions,check here BBB-RobertCNelson-Main Wiki</p>
+<pre><code>    git checkout origin/am335x-v3.8 -b eewiki
+</code></pre>
+<p><strong>Now setup the git and compile the kernel</strong></p>
+<pre><code>    apt-get update
+    apt-get install device-tree-compiler lzma lzop u-boot-tools libncurses5-dev
+    git config --global user.name "username"
+    git config --global user.email "useremailid"
+    ./build_kernel.sh
+</code></pre>
+<h2 id="add-usb-and-pps-driver">Add USB and PPS driver</h2>
+<p>While compiling for first time, LINUX_GIT is set by default(check its path in build_kernel.sh and /tools/rebuild.sh). Set it to 'pwd'/linux-dev/ignore/linux-src/ in build_kernel.sh and /tools/rebuild.sh, so use following for later use:</p>
+<pre><code>    export LINUX_GIT='pwd'/linux-dev/ignore/linux-src/
+</code></pre>
+<p>Please download our USB drivers patch which is required to use the WCDMA modem on Cape.</p>
+<pre><code>    wget wcdma_patch_vayu_usb_drivers.patch
+    patch -p1 &lt; wcdma_patch_vayu_usb_drivers.patch
+</code></pre>
+<p>Alternate to this, if patch is not applied clean, do following</p>
+<p><strong>Locate the file option.c under: /linux/drivers/usb/serial/option.c</strong> Edit the file to add following</p>
+<ul>
+<li>
+<p>Define on top following</p>
+<pre><code>/*  Yantrr Strongrising products */
+#define YANTRR_VENDOR_ID                         0x21f5
+#define YANTRR_PRODUCT_VAYU3G                   0x2012
+</code></pre>
+</li>
+<li>
+<p>Add following structure inside static struct usb_device_id option_ids[], you would find lot of modem defined here</p>
+<pre><code>/*  Yantrr Strongrising products */
+{ USB_DEVICE(YANTRR_VENDOR_ID, YANTRR_PRODUCT_VAYU3G) },
+</code></pre>
+</li>
+<li>
+<p>You may create your local patch based on kernel for next time patch</p>
+</li>
+<li>This option adding would help udev to detect the device</li>
+</ul>
+<h2 id="rebuild-kernel">Rebuild kernel</h2>
+<p>Now rebuild the kernel while enabling the pps drivers in makemenuconfig and after USB drivers patch applied.</p>
+<pre><code>    ./tools/rebuild.sh
+</code></pre>
+<ul>
+<li>
+<p>Following figures illustrate how to enable the PPS drivers and also some settings in USB drivers section</p>
+</li>
+<li>
+<p>First image shows the first screen of makemenuconfig while recompiling the kernel. Select Device drivers .</p>
+</li>
+</ul>
+<p><img alt="First_Image_for_makemenuconfig" src="./img/First_Image_for_makemenuconfig.png" /></p>
+<ul>
+<li>In the device drivers window, scroll down to select PPS support.</li>
+</ul>
+<p><img alt="2" src="./img/2.png" /></p>
+<ul>
+<li>In PPS support, select PPS client using GPIO as built-in driver. It should look like as illustrated in figure below :</li>
+</ul>
+<p><img alt="3" src="./img/3.png" /></p>
+<ul>
+<li>Exit PPS Support and select USB support and ensure that EHCI HCD (USB2.0) support is enabled. Please match other options too from the figure illustrated below :</li>
+</ul>
+<p><img alt="4" src="./img/4.png" /></p>
+<p>At the end of compilation , copy and paste the line with kernel_version, which is as follows</p>
+<pre><code>    export kernel_version=3.X.Y-Z          ( in our case 3.8.13-bone32)
+</code></pre>
+<p><strong>Root file system (~/)</strong></p>
+<p>Download and extract the minimal root file system for debian wheezy :</p>
+<pre><code>    wget -c https://rcn-ee.net//deb/minfs/wheezy/debian-7.3-minimal-armhf-2013-12-18.tar.xz
+    md5sum debian-7.3-minimal-armhf-2013-12-18.tar.xz
+    tar xf debian-7.3-minimal-armhf-2013-12-18.tar.xz
+</code></pre>
+<h2 id="setup-microsd-card-as-root">Setup MicroSD card (as root)</h2>
+<p><strong>Format and prepare a microSD card</strong></p>
+<p>Attach a microSD card of size atleast 2GB to the desktop with the help of a card reader.</p>
+<p>Use lsblk to determine device id of sd card , it is either /dev/mmcblkx or /dev/sdx , so supposedly :</p>
+<pre><code>    export DISK=/dev/mmcblk0
+    dd if=/dev/zero of=${DISK} bs=1M
+    sfdisk --in-order --Linux --unit M ${DISK} &lt;&lt;-__EOF__
+    1,48,0xE,*
+    ,,,-
+    __EOF__
+    dd if=/dev/zero of=${DISK} bs=512 count=1
+</code></pre>
+<p>Format partitions, for DISK=/dev/mmcblk0</p>
+<pre><code>    mkfs.vfat -F 16 ${DISK}p1 -n boot
+    mkfs.ext4 ${DISK}p2 -L rootfs
+</code></pre>
+<p>Or for DISK=/dev/sdX</p>
+<pre><code>    mkfs.vfat -F 16 ${DISK}1 -n boot
+    mkfs.ext4 ${DISK}2 -L rootfs
+</code></pre>
+<p>After formatting, mount the partitions. Mount paths may vary, sometimes they are auto mounted, otherwise do following</p>
+<pre><code>    mkdir -p /media/boot/
+    mkdir -p /media/rootfs/
+    mount ${DISK}p1 /media/boot/        or mount ${DISK}1 /media/boot/
+    mount ${DISK}p2 /media/rootfs/      or mount ${DISK}2 /media/rootfs/
+</code></pre>
+<p><strong>Install Bootloader</strong></p>
+<p>Now, Install bootloader by executing following commands (~/) :</p>
+<pre><code>    cp -v ./u-boot/MLO  /media/boo  t/
+    cp -v ./u-boot/u-boot.img  /media/boot/
+</code></pre>
+<p>Then, create “uEnv.txt” boot script and copy following in it: (nano uEnv.txt)</p>
+<pre><code>    #u-boot eMMC specific overrides; Angstrom Distribution (BeagleBone Black) 2013-06-20
+    kernel_file=zImage
+    initrd_file=uInitrd
+
+    loadzimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${kernel_file}
+    loadinitrd=load mmc ${mmcdev}:${mmcpart} 0x81000000 ${initrd_file}; setenv initrd_size ${filesize}
+    loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdtaddr} /dtbs/${fdtfile}
+    #
+
+    console=ttyO0,115200n8
+    mmcroot=/dev/mmcblk0p2 rw
+    mmcrootfstype=ext4 rootwait fixrtc
+
+    ##To disable HDMI/eMMC...
+    #optargs=capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN,BB-BONE-EMMC-2G
+
+    ##3.1MP Camera Cape
+    #optargs=capemgr.disable_partno=BB-BONE-EMMC-2G
+
+    mmcargs=setenv bootargs console=${console} root=${mmcroot} rootfstype=${mmcrootfstype} ${optargs}
+
+    #zImage:
+    uenvcmd=run loadzimage; run loadfdt; run mmcargs; bootz ${loadaddr} - ${fdtaddr}
+
+    #zImage + uInitrd: where uInitrd has to be generated on the running system.
+    #boot_fdt=run loadzimage; run loadinitrd; run loadfdt
+    #uenvcmd=run boot_fdt; run mmcargs; bootz ${loadaddr} 0x81000000:${initrd_size} ${fdtaddr}
+</code></pre>
+<p><br></p>
+<pre><code>    cp -v ./uEnv.txt  /media/boot/
+</code></pre>
+<h2 id="install-kernel-and-root-file-system">Install Kernel and Root file system</h2>
+<p>Now, we have to Install Kernel and root file system</p>
+<p><strong>Copy root file system (~/)</strong></p>
+<pre><code>    tar xfvp ./*-*-*-armhf-*/armhf-rootfs-*.tar -C /media/rootfs/
+</code></pre>
+<p><strong>Copy kernel files</strong></p>
+<pre><code>    cp -v ./linux-dev/deploy/${kernel_version}.zImage /media/boot/zImage
+    mkdir -p /media/boot/dtbs/
+    tar xfov ./linux-dev/deploy/${kernel_version}-dtbs.tar.gz -C /media/boot/dtbs/
+    tar xfv ./linux-dev/deploy/${kernel_version}-firmware.tar.gz -C /media/rootfs/lib/firmware
+    tar xfv ./linux-dev/deploy/${kernel_version}-modules.tar.gz -C /media/rootfs/
+</code></pre>
+<p><strong>Make a File systems table</strong></p>
+<p>edit /etc/fstab:</p>
+<pre><code>    nano /media/rootfs/etc/fstab
+</code></pre>
+<p>and copy following</p>
+<pre><code>    /dev/mmcblk0p2  /       auto    errors=remount-ro   0   1
+    /dev/mmcblk0p1  /boot/uboot auto    defaults        0   2
+</code></pre>
+<p><strong>Networking</strong></p>
+<p>edit /etc/network/interfaces</p>
+<pre><code>    nano /media/rootfs/etc/network/interfaces
+</code></pre>
+<p>and copy following (fixed ip)</p>
+<pre><code>    auto lo
+    iface lo inet loopback
+    auto eth0
+    #iface eth0 inet dhcp
+    iface eth0 inet static
+    address 192.168.1.150
+    netmask 255.255.255.0
+    network 192.168.1.0
+    gateway 192.168.1.1
+</code></pre>
+<p><strong>Networking: using a shared sd card with multiple beaglebone</strong></p>
+<p>nano /media/rootfs/etc/udev/rules.d/70-persistent-net.rules</p>
+<p>and copy following</p>
+<pre><code>    # BeagleBone: net device ()
+    SUBSYSTEM=="net", ACTION=="add", DRIVERS=="?*", ATTR{dev_id}=="0x0", ATTR{type}=="1", KERNEL=="eth*", NAME="eth0"
+</code></pre>
+<p><strong>Enable serial login to system</strong></p>
+<pre><code>    nano /media/rootfs/etc/inittab
+</code></pre>
+<p>and copy following at the end of inittab</p>
+<pre><code>    T0:23:respawn:/sbin/getty -L ttyO0 115200 vt102
+</code></pre>
+<p>Remove microsd card</p>
+<pre><code>    sync
+    umount /media/boot/
+    umount /media/rootfs/
+</code></pre>
+<h2 id="extras">Extras</h2>
+<p><strong>USB Gadget (http access to beaglebone black over usb)</strong></p>
+<p>Run beaglebone black with the created sd card and then do the following in it over eth0 ssh</p>
+<pre><code>    apt-get install udhcpd
+</code></pre>
+<p>Edit the file at /etc/default/udhcpd for enabling udhcpd</p>
+<p>Edit /etc/network/interfaces to add following at the end</p>
+<pre><code>    Ethernet/RNDIS gadget (g_ether)
+    ... or on host side, usbnet and random hwaddr
+    iface usb0 inet static
+    address 192.168.7.2
+    netmask 255.255.255.0
+    network 192.168.7.0
+    gateway 192.168.7.1
+</code></pre>
+<p><strong>Other scripts are also there, they can be found here :</strong></p>
+<p><a href="https://raw.githubusercontent.com/RobertCNelson/tools/master/scripts/">https://raw.github.com/RobertCNelson/tools/master/scripts/</a></p>
+<p><code>Note :</code> These steps are publicly available here : 
+<a href="./eewiki.net/display/linuxonarm/BeagleBone+Black">http://eewiki.net/display/linuxonarm/BeagleBone+Black</a></p>
+<p>Please check the above link for any updates. </p>
+              
+            </div>
+          </div>
+          <footer>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="http://www.mkdocs.org">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+	  
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+<div class="rst-versions" role="note" style="cursor: pointer">
+    <span class="rst-current-version" data-toggle="rst-current-version">
+      
+      
+      
+    </span>
+</div>
+
+</body>
+</html>
+
+<!--
+MkDocs version : 0.15.3
+Build Date UTC : 2016-07-22 17:08:54.044410
+-->
